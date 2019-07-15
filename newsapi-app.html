@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>News App</title>
+  </head>
+
+  <body>
+    <header>
+      <h1>News App</h1>
+    </header>
+    <form id="searchForm">
+      <input type="search" />
+      <input type="submit" value="Search" />
+      <label for="sort-new">new</label>
+      <input type="radio" name="sort" id="sort-new" />
+      <label for="sort-old">old</label>
+      <input type="radio" name="sort" id="sort-old" />
+    </form>
+    <section id="news-cards"></section>
+
+    <script>
+      const url = `https://newsapi.org/v2/top-headlines?country=de&apiKey=0d7dc505033c49259c0717ef0002ddee`;
+
+      fetch(url)
+        .then(res => res.json())
+        .then(function(data) {
+          // console.log(data.articles);
+          const arts = data.articles;
+          const figures = arts.map(item => {
+            return `<figure>
+        <img src="${item.urlToImage}" alt="${item.title}">
+        <figcaption>
+            <h4>${item.title}</h4>
+            <p>${item.content}</p>
+            <a href="${item.url}">Read more</a>
+        </figcaption>
+    </figure>`;
+          });
+          // console.log(figures);
+          document.querySelector("#news-cards").innerHTML = figures.join("\n");
+        });
+
+      const myForm = document.forms.searchForm;
+      myForm.addEventListener("submit", e => {
+        e.preventDefault();
+        const searchedItem = document.querySelector(
+          '#searchForm input[type="search"]'
+        ).value;
+        const sortNew = document.querySelector("#sort-new");
+        const sortOld = document.querySelector("#sort-old");
+        console.log(sortNew);
+        console.log(sortOld);
+
+        fetch(
+          `https://newsapi.org/v2/everything?q=${searchedItem}&apiKey=0d7dc505033c49259c0717ef0002ddee`
+        )
+          .then(res => res.json())
+          .then(function(data) {
+            // console.log(data.articles);
+            // const arts = data.articles;
+            console.log(data.articles.map(item => item.publishedAt));
+            if (sortNew.checked) {
+              data.articles.sort((item1, item2) => {
+                if (item1.publishedAt < item2.publishedAt) return 1;
+                if (item1.publishedAt > item2.publishedAt) return -1;
+                return 0;
+              });
+            }
+            if (sortOld.checked) {
+              data.articles.sort((item1, item2) => {
+                if (item1.publishedAt < item2.publishedAt) return -1;
+                if (item1.publishedAt > item2.publishedAt) return 1;
+                return 0;
+              });
+            }
+            console.log(data.articles.map(item => item.publishedAt));
+            const figures = data.articles.map(item => {
+              return `<figure>
+        <img src="${item.urlToImage}" alt="${item.title}">
+        <figcaption>
+            <h4>${item.title}</h4>
+            <p>${item.content}</p>
+            <a href="${item.url}">Read more</a>
+        </figcaption>
+    </figure>`;
+            });
+            // console.log(figures);
+            document.querySelector("#news-cards").innerHTML = figures.join(
+              "\n"
+            );
+          });
+
+        document.querySelector('#searchForm input[type="search"]').value = "";
+      });
+    </script>
+  </body>
+</html>
